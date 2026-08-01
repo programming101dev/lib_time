@@ -2,8 +2,10 @@
 #include <p101_env/env.h>
 #include <p101_error/error.h>
 #include <p101_time/time.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static int failures;
 
@@ -38,13 +40,13 @@ static int fail_next_call(const struct p101_env *env, const char *call_name, voi
 static void test_p101_clock_getres(struct p101_env *env, struct p101_error *err)
 {
 #ifdef __linux__
-    static const int errors[] = {EACCES, EFAULT, EINVAL, ENODEV, ENOTSUP, EOVERFLOW, EPERM};
+    static const int errors[] = {EIO};
 #elif defined(__APPLE__)
-    static const int errors[] = {EFAULT, EINVAL, EPERM};
+    static const int errors[] = {EFAULT, EINVAL};
 #elif defined(__FreeBSD__)
     static const int errors[] = {EINVAL, EPERM};
 #else
-    static const int errors[] = {EINVAL, EOVERFLOW, EPERM};
+    static const int errors[] = {EINVAL};
 #endif
 
     for(size_t index = 0U; index < sizeof(errors) / sizeof(errors[0]); index++)
@@ -65,13 +67,13 @@ static void test_p101_clock_getres(struct p101_env *env, struct p101_error *err)
 static void test_p101_clock_gettime(struct p101_env *env, struct p101_error *err)
 {
 #ifdef __linux__
-    static const int errors[] = {EACCES, EFAULT, EINVAL, ENODEV, ENOTSUP, EOVERFLOW, EPERM};
+    static const int errors[] = {EIO};
 #elif defined(__APPLE__)
-    static const int errors[] = {EFAULT, EINVAL, EPERM};
+    static const int errors[] = {EFAULT, EINVAL};
 #elif defined(__FreeBSD__)
     static const int errors[] = {EINVAL, EPERM};
 #else
-    static const int errors[] = {EINVAL, EOVERFLOW, EPERM};
+    static const int errors[] = {EINVAL, EOVERFLOW};
 #endif
 
     for(size_t index = 0U; index < sizeof(errors) / sizeof(errors[0]); index++)
@@ -98,7 +100,7 @@ static void test_p101_clock_settime(struct p101_env *env, struct p101_error *err
 #elif defined(__FreeBSD__)
     static const int errors[] = {EINVAL, EPERM};
 #else
-    static const int errors[] = {EINVAL, EOVERFLOW, EPERM};
+    static const int errors[] = {EINVAL, EPERM};
 #endif
 
     for(size_t index = 0U; index < sizeof(errors) / sizeof(errors[0]); index++)
