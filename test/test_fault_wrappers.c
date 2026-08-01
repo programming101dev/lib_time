@@ -20,6 +20,7 @@ static int failures;
 struct fault_state
 {
     int checks;
+    int errnum;
 };
 
 static int fail_next_call(const struct p101_env *env, const char *call_name, void *user_data)
@@ -30,90 +31,168 @@ static int fail_next_call(const struct p101_env *env, const char *call_name, voi
     (void)call_name;
     state = user_data;
     state->checks++;
-    return EIO;
+    return state->errnum;
 }
 
 /* P101_TEST_CASE(p101_clock_getres) */
 static void test_p101_clock_getres(struct p101_env *env, struct p101_error *err)
 {
-    struct fault_state state = {0};
+#ifdef __linux__
+    static const int errors[] = {EACCES, EFAULT, EINVAL, ENODEV, ENOTSUP, EOVERFLOW, EPERM};
+#elif defined(__APPLE__)
+    static const int errors[] = {EFAULT, EINVAL, EPERM};
+#elif defined(__FreeBSD__)
+    static const int errors[] = {EINVAL, EPERM};
+#else
+    static const int errors[] = {EINVAL, EOVERFLOW, EPERM};
+#endif
 
-    p101_env_set_fault_injector(env, fail_next_call, &state);
-    int result = p101_clock_getres(env, err, 0, NULL);
-    (void)result;
-    EXPECT(state.checks == 1);
-    EXPECT(p101_error_has_error(err));
-    p101_error_reset(err);
+    for(size_t index = 0U; index < sizeof(errors) / sizeof(errors[0]); index++)
+    {
+        struct fault_state state = {0, errors[index]};
+
+        p101_env_set_fault_injector(env, fail_next_call, &state);
+        int result = p101_clock_getres(env, err, 0, NULL);
+        (void)result;
+        EXPECT(state.checks == 1);
+        EXPECT(p101_error_is_errno(err, state.errnum));
+        p101_error_reset(err);
+    }
     p101_env_set_fault_injector(env, NULL, NULL);
 }
 
 /* P101_TEST_CASE(p101_clock_gettime) */
 static void test_p101_clock_gettime(struct p101_env *env, struct p101_error *err)
 {
-    struct fault_state state = {0};
+#ifdef __linux__
+    static const int errors[] = {EACCES, EFAULT, EINVAL, ENODEV, ENOTSUP, EOVERFLOW, EPERM};
+#elif defined(__APPLE__)
+    static const int errors[] = {EFAULT, EINVAL, EPERM};
+#elif defined(__FreeBSD__)
+    static const int errors[] = {EINVAL, EPERM};
+#else
+    static const int errors[] = {EINVAL, EOVERFLOW, EPERM};
+#endif
 
-    p101_env_set_fault_injector(env, fail_next_call, &state);
-    int result = p101_clock_gettime(env, err, 0, NULL);
-    (void)result;
-    EXPECT(state.checks == 1);
-    EXPECT(p101_error_has_error(err));
-    p101_error_reset(err);
+    for(size_t index = 0U; index < sizeof(errors) / sizeof(errors[0]); index++)
+    {
+        struct fault_state state = {0, errors[index]};
+
+        p101_env_set_fault_injector(env, fail_next_call, &state);
+        int result = p101_clock_gettime(env, err, 0, NULL);
+        (void)result;
+        EXPECT(state.checks == 1);
+        EXPECT(p101_error_is_errno(err, state.errnum));
+        p101_error_reset(err);
+    }
     p101_env_set_fault_injector(env, NULL, NULL);
 }
 
 /* P101_TEST_CASE(p101_clock_settime) */
 static void test_p101_clock_settime(struct p101_env *env, struct p101_error *err)
 {
-    struct fault_state state = {0};
+#ifdef __linux__
+    static const int errors[] = {EACCES, EFAULT, EINVAL, ENODEV, ENOTSUP, EOVERFLOW, EPERM};
+#elif defined(__APPLE__)
+    static const int errors[] = {EFAULT, EINVAL, EPERM};
+#elif defined(__FreeBSD__)
+    static const int errors[] = {EINVAL, EPERM};
+#else
+    static const int errors[] = {EINVAL, EOVERFLOW, EPERM};
+#endif
 
-    p101_env_set_fault_injector(env, fail_next_call, &state);
-    int result = p101_clock_settime(env, err, 0, NULL);
-    (void)result;
-    EXPECT(state.checks == 1);
-    EXPECT(p101_error_has_error(err));
-    p101_error_reset(err);
+    for(size_t index = 0U; index < sizeof(errors) / sizeof(errors[0]); index++)
+    {
+        struct fault_state state = {0, errors[index]};
+
+        p101_env_set_fault_injector(env, fail_next_call, &state);
+        int result = p101_clock_settime(env, err, 0, NULL);
+        (void)result;
+        EXPECT(state.checks == 1);
+        EXPECT(p101_error_is_errno(err, state.errnum));
+        p101_error_reset(err);
+    }
     p101_env_set_fault_injector(env, NULL, NULL);
 }
 
 /* P101_TEST_CASE(p101_gmtime_r) */
 static void test_p101_gmtime_r(struct p101_env *env, struct p101_error *err)
 {
-    struct fault_state state = {0};
+#ifdef __linux__
+    static const int errors[] = {EOVERFLOW};
+#elif defined(__APPLE__)
+    static const int errors[] = {EIO};
+#elif defined(__FreeBSD__)
+    static const int errors[] = {EIO};
+#else
+    static const int errors[] = {EOVERFLOW};
+#endif
 
-    p101_env_set_fault_injector(env, fail_next_call, &state);
-    struct tm *result = p101_gmtime_r(env, err, NULL, NULL);
-    (void)result;
-    EXPECT(state.checks == 1);
-    EXPECT(p101_error_has_error(err));
-    p101_error_reset(err);
+    for(size_t index = 0U; index < sizeof(errors) / sizeof(errors[0]); index++)
+    {
+        struct fault_state state = {0, errors[index]};
+
+        p101_env_set_fault_injector(env, fail_next_call, &state);
+        struct tm *result = p101_gmtime_r(env, err, NULL, NULL);
+        (void)result;
+        EXPECT(state.checks == 1);
+        EXPECT(p101_error_is_errno(err, state.errnum));
+        p101_error_reset(err);
+    }
     p101_env_set_fault_injector(env, NULL, NULL);
 }
 
 /* P101_TEST_CASE(p101_localtime_r) */
 static void test_p101_localtime_r(struct p101_env *env, struct p101_error *err)
 {
-    struct fault_state state = {0};
+#ifdef __linux__
+    static const int errors[] = {EOVERFLOW};
+#elif defined(__APPLE__)
+    static const int errors[] = {EIO};
+#elif defined(__FreeBSD__)
+    static const int errors[] = {EIO};
+#else
+    static const int errors[] = {EOVERFLOW};
+#endif
 
-    p101_env_set_fault_injector(env, fail_next_call, &state);
-    struct tm *result = p101_localtime_r(env, err, NULL, NULL);
-    (void)result;
-    EXPECT(state.checks == 1);
-    EXPECT(p101_error_has_error(err));
-    p101_error_reset(err);
+    for(size_t index = 0U; index < sizeof(errors) / sizeof(errors[0]); index++)
+    {
+        struct fault_state state = {0, errors[index]};
+
+        p101_env_set_fault_injector(env, fail_next_call, &state);
+        struct tm *result = p101_localtime_r(env, err, NULL, NULL);
+        (void)result;
+        EXPECT(state.checks == 1);
+        EXPECT(p101_error_is_errno(err, state.errnum));
+        p101_error_reset(err);
+    }
     p101_env_set_fault_injector(env, NULL, NULL);
 }
 
 /* P101_TEST_CASE(p101_nanosleep) */
 static void test_p101_nanosleep(struct p101_env *env, struct p101_error *err)
 {
-    struct fault_state state = {0};
+#ifdef __linux__
+    static const int errors[] = {EFAULT, EINTR, EINVAL};
+#elif defined(__APPLE__)
+    static const int errors[] = {EINTR, EINVAL};
+#elif defined(__FreeBSD__)
+    static const int errors[] = {EFAULT, EINTR, EINVAL, ENOTSUP};
+#else
+    static const int errors[] = {EINTR, EINVAL};
+#endif
 
-    p101_env_set_fault_injector(env, fail_next_call, &state);
-    int result = p101_nanosleep(env, err, NULL, NULL);
-    (void)result;
-    EXPECT(state.checks == 1);
-    EXPECT(p101_error_has_error(err));
-    p101_error_reset(err);
+    for(size_t index = 0U; index < sizeof(errors) / sizeof(errors[0]); index++)
+    {
+        struct fault_state state = {0, errors[index]};
+
+        p101_env_set_fault_injector(env, fail_next_call, &state);
+        int result = p101_nanosleep(env, err, NULL, NULL);
+        (void)result;
+        EXPECT(state.checks == 1);
+        EXPECT(p101_error_is_errno(err, state.errnum));
+        p101_error_reset(err);
+    }
     p101_env_set_fault_injector(env, NULL, NULL);
 }
 
