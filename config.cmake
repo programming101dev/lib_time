@@ -28,7 +28,6 @@ set(p101_time_HEADERS
 set(p101_time_LINK_LIBRARIES
         p101_error
         p101_env
-        p101_tool_event
         p101_c
 )
 
