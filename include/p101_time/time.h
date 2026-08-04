@@ -30,7 +30,7 @@ extern "C"
     struct tm *p101_gmtime_r(const struct p101_env *env, struct p101_error *err, const time_t *restrict timer, struct tm *restrict result);
     struct tm *p101_localtime_r(const struct p101_env *env, struct p101_error *err, const time_t *restrict timer, struct tm *restrict result);
     int        p101_nanosleep(const struct p101_env *env, struct p101_error *err, const struct timespec *rqtp, struct timespec *rmtp);
-    size_t     p101_strftime_l(const struct p101_env *env, char *restrict s, size_t maxsize, const char *restrict format, const struct tm *restrict timeptr, locale_t locale) P101_ATTR_STRFTIME(4);
+    size_t     p101_strftime_l(const struct p101_env *env, struct p101_error *err, char *restrict s, size_t maxsize, const char *restrict format, const struct tm *restrict timeptr, locale_t locale) P101_ATTR_STRFTIME(5);
     char      *p101_strptime(const struct p101_env *env, const char *restrict buf, const char *restrict format, struct tm *restrict tm);
     void       p101_tzset(const struct p101_env *env);
 

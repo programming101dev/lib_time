@@ -5,6 +5,6 @@ p101_clock_settime	fault	test/test_fault_wrappers.c
 p101_gmtime_r	fault	test/test_fault_wrappers.c
 p101_localtime_r	fault	test/test_fault_wrappers.c
 p101_nanosleep	fault	test/test_fault_wrappers.c
-p101_strftime_l	behavior	test/test_behavior.c
+p101_strftime_l	fault	test/test_fault_wrappers.c
 p101_strptime	behavior	test/test_behavior.c
 p101_tzset	behavior	test/test_behavior.c

@@ -58,8 +58,8 @@ int main(void)
         value.tm_year = 126;
         value.tm_mon  = 6;
         value.tm_mday = 31;
-        /* P101_TEST_CASE(p101_strftime_l) */
-        EXPECT(p101_strftime_l(env, output, sizeof(output), "%Y-%m-%d", &value, locale) == 10);
+        EXPECT(p101_strftime_l(env, err, output, sizeof(output), "%Y-%m-%d", &value, locale) == 10);
+        EXPECT(p101_error_has_no_error(err));
         EXPECT(strcmp(output, "2026-07-31") == 0);
         freelocale(locale);
     }

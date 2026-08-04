@@ -119,8 +119,8 @@ static void count_resource_event(const struct p101_env *env, p101_env_resource_k
 static void test_p101_clock_getres(struct p101_env *env, struct p101_error *err)
 {
 #ifdef __linux__
-    static const int         errors[]      = {EIO};
-    static const char *const error_names[] = {"EIO"};
+    static const int         errors[]      = {EINVAL};
+    static const char *const error_names[] = {"EINVAL"};
 #elif defined(__APPLE__)
     static const int         errors[]      = {EFAULT, EINVAL};
     static const char *const error_names[] = {"EFAULT", "EINVAL"};
@@ -159,8 +159,8 @@ static void test_p101_clock_getres(struct p101_env *env, struct p101_error *err)
 static void test_p101_clock_gettime(struct p101_env *env, struct p101_error *err)
 {
 #ifdef __linux__
-    static const int         errors[]      = {EIO};
-    static const char *const error_names[] = {"EIO"};
+    static const int         errors[]      = {EINVAL, EOVERFLOW};
+    static const char *const error_names[] = {"EINVAL", "EOVERFLOW"};
 #elif defined(__APPLE__)
     static const int         errors[]      = {EFAULT, EINVAL};
     static const char *const error_names[] = {"EFAULT", "EINVAL"};
@@ -242,11 +242,11 @@ static void test_p101_gmtime_r(struct p101_env *env, struct p101_error *err)
     static const int         errors[]      = {EOVERFLOW};
     static const char *const error_names[] = {"EOVERFLOW"};
 #elif defined(__APPLE__)
-    static const int         errors[]      = {EIO};
-    static const char *const error_names[] = {"EIO"};
+    static const int         errors[]      = {EOVERFLOW};
+    static const char *const error_names[] = {"EOVERFLOW"};
 #elif defined(__FreeBSD__)
-    static const int         errors[]      = {EIO};
-    static const char *const error_names[] = {"EIO"};
+    static const int         errors[]      = {EOVERFLOW};
+    static const char *const error_names[] = {"EOVERFLOW"};
 #else
     static const int         errors[]      = {EOVERFLOW};
     static const char *const error_names[] = {"EOVERFLOW"};
@@ -282,11 +282,11 @@ static void test_p101_localtime_r(struct p101_env *env, struct p101_error *err)
     static const int         errors[]      = {EOVERFLOW};
     static const char *const error_names[] = {"EOVERFLOW"};
 #elif defined(__APPLE__)
-    static const int         errors[]      = {EIO};
-    static const char *const error_names[] = {"EIO"};
+    static const int         errors[]      = {EOVERFLOW};
+    static const char *const error_names[] = {"EOVERFLOW"};
 #elif defined(__FreeBSD__)
-    static const int         errors[]      = {EIO};
-    static const char *const error_names[] = {"EIO"};
+    static const int         errors[]      = {EOVERFLOW};
+    static const char *const error_names[] = {"EOVERFLOW"};
 #else
     static const int         errors[]      = {EOVERFLOW};
     static const char *const error_names[] = {"EOVERFLOW"};
@@ -355,6 +355,51 @@ static void test_p101_nanosleep(struct p101_env *env, struct p101_error *err)
     p101_env_set_fault_injector(env, NULL, NULL);
 }
 
+/* P101_TEST_CASE(p101_strftime_l) */
+static void test_p101_strftime_l(struct p101_env *env, struct p101_error *err)
+{
+    char          argument_2[4];
+    unsigned char argument_2_before[sizeof(argument_2)];
+    memset(argument_2, 0xA5, sizeof(argument_2));
+    memcpy(argument_2_before, argument_2, sizeof(argument_2));
+#ifdef __linux__
+    static const int         errors[]      = {EINVAL, EOVERFLOW, ERANGE};
+    static const char *const error_names[] = {"EINVAL", "EOVERFLOW", "ERANGE"};
+#elif defined(__APPLE__)
+    static const int         errors[]      = {EINVAL, EOVERFLOW, ERANGE};
+    static const char *const error_names[] = {"EINVAL", "EOVERFLOW", "ERANGE"};
+#elif defined(__FreeBSD__)
+    static const int         errors[]      = {EINVAL, EOVERFLOW, ERANGE};
+    static const char *const error_names[] = {"EINVAL", "EOVERFLOW", "ERANGE"};
+#else
+    static const int         errors[]      = {EINVAL, EOVERFLOW, ERANGE};
+    static const char *const error_names[] = {"EINVAL", "EOVERFLOW", "ERANGE"};
+#endif
+
+    for(size_t index = 0U; index < sizeof(errors) / sizeof(errors[0]); index++)
+    {
+        struct fault_state state = {0, errors[index]};
+        int                failures_before;
+
+        failures_before = failures;
+        EXPECT(p101_error_has_no_error(err));
+        fault_resource_events = 0U;
+        errno                 = P101_TEST_ERRNO_SENTINEL;
+        p101_env_set_fault_injector(env, fail_next_call, &state);
+        size_t result = p101_strftime_l(env, err, argument_2, 0, "p101", NULL, (locale_t){0});
+        (void)result;
+        EXPECT(state.checks == 1);
+        EXPECT(p101_error_is_errno(err, state.code));
+        EXPECT(errno == P101_TEST_ERRNO_SENTINEL);
+        EXPECT(result == (0U));
+        EXPECT(memcmp(argument_2, argument_2_before, sizeof(argument_2)) == 0);
+        EXPECT(fault_resource_events == 0U);
+        write_outcome("p101_strftime_l", "errno", error_names[index], state.code, failures == failures_before);
+        p101_error_reset(err);
+    }
+    p101_env_set_fault_injector(env, NULL, NULL);
+}
+
 int main(void)
 {
     const char        *outcome_path;
@@ -399,6 +444,7 @@ int main(void)
     test_p101_gmtime_r(env, err);
     test_p101_localtime_r(env, err);
     test_p101_nanosleep(env, err);
+    test_p101_strftime_l(env, err);
     p101_env_destroy(env);
     p101_error_destroy(err);
     if(outcome_stream != NULL && fclose(outcome_stream) != 0)
