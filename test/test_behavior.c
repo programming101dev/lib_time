@@ -26,7 +26,6 @@ int main(void)
     struct tm          parsed = {0};
     struct tm          value  = {0};
     locale_t           locale;
-    char               output[32];
     char              *end;
 
     err = p101_error_create(false);
@@ -55,6 +54,8 @@ int main(void)
     EXPECT(locale != (locale_t)0);
     if(locale != (locale_t)0)
     {
+        char output[32];
+
         value.tm_year = 126;
         value.tm_mon  = 6;
         value.tm_mday = 31;
