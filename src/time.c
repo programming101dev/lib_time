@@ -33,8 +33,6 @@
  * limitations under the License.
  */
 
-#include <p101_env/wrapper.h>
-
 int p101_clock_getres(const struct p101_env *env, struct p101_error *err, clockid_t clock_id, struct timespec *res)
 {
     int ret_val;
