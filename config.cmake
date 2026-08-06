@@ -19,8 +19,7 @@ set(BSD_STANDARD_FLAGS -D_BSD_SOURCE -D__BSD_VISIBLE)
 
 set(LIBRARY_TARGETS p101_time)
 set(p101_time_SOURCES
-        src/posix/time.c
-        src/posix_xsi/time.c
+        src/time.c
 )
 set(p101_time_HEADERS
         include/p101_time/time.h
