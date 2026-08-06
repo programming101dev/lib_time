@@ -22,7 +22,7 @@ set(p101_time_SOURCES
         src/time.c
 )
 set(p101_time_HEADERS
-        include/p101_time/time.h
+        include/p101_time/p101_time.h
 )
 set(p101_time_LINK_LIBRARIES
         p101_error
