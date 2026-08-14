@@ -1,0 +1,8 @@
+function	function_usr	domain	symbol_header	linux_faults	macos_faults	freebsd_faults	posix_faults	linux_conditional	macos_conditional	freebsd_conditional
+p101_clock_getres	c:@F@p101_clock_getres	errno	errno.h	EINVAL	EFAULT,EINVAL	EINVAL,EPERM	EINVAL			
+p101_clock_gettime	c:@F@p101_clock_gettime	errno	errno.h	EINVAL,EOVERFLOW	EFAULT,EINVAL	EINVAL,EPERM	EINVAL,EOVERFLOW			
+p101_clock_settime	c:@F@p101_clock_settime	errno	errno.h	EACCES,EFAULT,EINVAL,ENODEV,ENOTSUP,EOVERFLOW,EPERM	EFAULT,EINVAL,EPERM	EINVAL,EPERM	EINVAL,EPERM			
+p101_gmtime_r	c:@F@p101_gmtime_r	errno	errno.h	EOVERFLOW	EOVERFLOW	EOVERFLOW	EOVERFLOW			
+p101_localtime_r	c:@F@p101_localtime_r	errno	errno.h	EOVERFLOW	EOVERFLOW	EOVERFLOW	EOVERFLOW			
+p101_nanosleep	c:@F@p101_nanosleep	errno	errno.h	EFAULT,EINTR,EINVAL	EINTR,EINVAL	EFAULT,EINTR,EINVAL,ENOTSUP	EINTR,EINVAL			
+p101_strftime_l	c:@F@p101_strftime_l	errno	errno.h	EINVAL,EOVERFLOW,ERANGE	EINVAL,EOVERFLOW,ERANGE	EINVAL,EOVERFLOW,ERANGE	EINVAL,EOVERFLOW,ERANGE			
